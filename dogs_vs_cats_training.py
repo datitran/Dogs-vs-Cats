@@ -2,12 +2,12 @@ import logging
 import glob
 import numpy as np
 from PIL import Image
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation, Flatten
-from keras.layers import Convolution2D, MaxPooling2D
-from keras.optimizers import SGD
 from sklearn.model_selection import StratifiedShuffleSplit, train_test_split
 from sklearn.metrics import accuracy_score
+from modified_vgg_16_model import modified_vgg_16l
+
+WIDTH = 64
+HEIGHT = 64
 
 
 def create_logger():
@@ -22,7 +22,7 @@ def create_logger():
 
 
 def convert_image_to_data(image):
-    image_resized = Image.open(image).resize((100, 100))
+    image_resized = Image.open(image).resize((WIDTH, HEIGHT))
     cat_array = np.array(image_resized).T
     return cat_array
 
@@ -46,45 +46,13 @@ def create_train_test_data():
     return X_train, X_test, y_train, y_test
 
 
-def create_model():
-    model = Sequential()
-    # input: 100x100 images with 3 channels -> (3, 100, 100) tensors.
-    # this applies 32 convolution filters of size 3x3 each.
-    model.add(Convolution2D(32, 3, 3, border_mode='valid', input_shape=(3, 100, 100)))
-    model.add(Activation('relu'))
-    model.add(Convolution2D(32, 3, 3))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.25))
-
-    model.add(Convolution2D(64, 3, 3, border_mode='valid'))
-    model.add(Activation('relu'))
-    model.add(Convolution2D(64, 3, 3))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.25))
-
-    model.add(Flatten())
-    # Note: Keras does automatic shape inference.
-    model.add(Dense(256))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.5))
-
-    model.add(Dense(1))
-    model.add(Activation('sigmoid'))
-
-    sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
-    model.compile(loss='binary_crossentropy', optimizer=sgd, metrics=['accuracy'])
-    return model
-
-
 def train_model(model, X_data_train, y_target_train):
-    model.fit(X_data_train, y_target_train, batch_size=32, nb_epoch=20)
+    model.fit(X_data_train, y_target_train, batch_size=32, nb_epoch=20, validation_split=0.2)
     return model
 
 
 def evaluate_model(model, X_data_test, y_target_test):
-    y_test_predict = model.predict(X_data_test)
+    y_test_predict = model.predict_classes(X_data_test)
     return accuracy_score(y_target_test, y_test_predict)
 
 
@@ -95,7 +63,7 @@ if __name__ == "__main__":
     logger.info("Shape for X_train: " + str(X_train.shape) + " Shape for y_train: " + str(y_train.shape))
 
     logger.info("Create the model.")
-    model = create_model()
+    model = modified_vgg_16l(WIDTH, HEIGHT)
 
     logger.info("Train the model.")
     trained_model = train_model(model, X_train, y_train)
