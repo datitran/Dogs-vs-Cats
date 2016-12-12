@@ -1,9 +1,12 @@
 import logging
 import glob
 import numpy as np
+
+np.random.seed(1337)
 from PIL import Image
 from sklearn.model_selection import StratifiedShuffleSplit, train_test_split
 from sklearn.metrics import accuracy_score
+from keras.callbacks import EarlyStopping
 from modified_vgg_16_model import modified_vgg_16l
 
 WIDTH = 64
@@ -47,7 +50,9 @@ def create_train_test_data():
 
 
 def train_model(model, X_data_train, y_target_train):
-    model.fit(X_data_train, y_target_train, batch_size=32, nb_epoch=20, validation_split=0.2)
+    early_stopping = EarlyStopping(monitor="loss", patience=3)
+    model.fit(X_data_train, y_target_train, batch_size=32, nb_epoch=20, validation_split=0.2,
+              callbacks=[early_stopping])
     return model
 
 

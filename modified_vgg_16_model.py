@@ -6,15 +6,9 @@ from keras.optimizers import RMSprop
 
 def modified_vgg_16l(width, height):
     model = Sequential()
-    # input: 100x100 images with 3 channels -> (3, 100, 100) tensors.
-    # this applies 32 convolution filters of size 3x3 each.
-    model.add(Convolution2D(32, 3, 3, border_mode='same', input_shape=(3, width, height)))
-    model.add(Activation('relu'))
-    model.add(Convolution2D(32, 3, 3))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-
-    model.add(Convolution2D(64, 3, 3, border_mode='same'))
+    # input: 64x64 images with 3 channels -> (3, 64, 64) tensors.
+    # this applies 64 convolution filters of size 3x3 each.
+    model.add(Convolution2D(64, 3, 3, border_mode='same', input_shape=(3, width, height)))
     model.add(Activation('relu'))
     model.add(Convolution2D(64, 3, 3))
     model.add(Activation('relu'))
