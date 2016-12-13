@@ -26,8 +26,8 @@ def create_logger():
 
 def convert_image_to_data(image):
     image_resized = Image.open(image).resize((WIDTH, HEIGHT))
-    cat_array = np.array(image_resized).T
-    return cat_array
+    image_array = np.array(image_resized).T
+    return image_array
 
 
 def create_train_test_data():
