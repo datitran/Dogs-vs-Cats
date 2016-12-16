@@ -8,9 +8,14 @@ from sklearn.model_selection import StratifiedShuffleSplit, train_test_split
 from sklearn.metrics import accuracy_score
 from keras.callbacks import EarlyStopping
 from modified_vgg_16_model import modified_vgg_16l
+from google_net import modified_googlenet
 
-WIDTH = 64
-HEIGHT = 64
+"""
+64 * 64 for VGG16
+224 * 224 for GoogleNet
+"""
+WIDTH = 224
+HEIGHT = 224
 
 
 def create_logger():
@@ -24,19 +29,19 @@ def create_logger():
     return logger
 
 
-def convert_image_to_data(image):
+def convert_image_to_data(image, WIDTH, HEIGHT):
     image_resized = Image.open(image).resize((WIDTH, HEIGHT))
     image_array = np.array(image_resized).T
     return image_array
 
 
-def create_train_test_data():
+def create_train_test_data(WIDTH, HEIGHT):
     cat_files = glob.glob("data/train/cat*")
     dog_files = glob.glob("data/train/dog*")
 
     # Restrict cat and dog files here for testing
-    cat_list = [convert_image_to_data(i) for i in cat_files]
-    dog_list = [convert_image_to_data(i) for i in dog_files]
+    cat_list = [convert_image_to_data(i, WIDTH, HEIGHT) for i in cat_files]
+    dog_list = [convert_image_to_data(i, WIDTH, HEIGHT) for i in dog_files]
 
     y_cat = np.zeros(len(cat_list))
     y_dog = np.ones(len(dog_list))
@@ -49,10 +54,21 @@ def create_train_test_data():
     return X_train, X_test, y_train, y_test
 
 
-def train_model(model, X_data_train, y_target_train):
+def train_model(model, X_data_train, y_target_train, flag):
+    """
+    :param model: compiled model
+    :param X_data_train: 3d array
+    :param y_target_train: 1d array
+    :param flag: true if googlnet (output expect 3d array) else false if 1d array for output
+    :return: fitted model
+    """
     early_stopping = EarlyStopping(monitor="loss", patience=3)
-    model.fit(X_data_train, y_target_train, batch_size=32, nb_epoch=20, validation_split=0.2,
-              callbacks=[early_stopping])
+    if flag:
+        model.fit(X_data_train, [y_target_train] * 3, batch_size=32, nb_epoch=20, validation_split=0.2,
+                  callbacks=[early_stopping])
+    else:
+        model.fit(X_data_train, y_target_train, batch_size=32, nb_epoch=20, validation_split=0.2,
+                  callbacks=[early_stopping])
     return model
 
 
@@ -64,18 +80,21 @@ def evaluate_model(model, X_data_test, y_target_test):
 if __name__ == "__main__":
     logger = create_logger()
     logger.info("Create train and test dataset.")
-    X_train, X_test, y_train, y_test = create_train_test_data()
+    X_train, X_test, y_train, y_test = create_train_test_data(WIDTH, HEIGHT)
     logger.info("Shape for X_train: " + str(X_train.shape) + " Shape for y_train: " + str(y_train.shape))
 
     logger.info("Create the model.")
-    model = modified_vgg_16l(WIDTH, HEIGHT)
+    # model = modified_vgg_16l(WIDTH, HEIGHT)
+    model = modified_googlenet(WIDTH, HEIGHT)
 
     logger.info("Train the model.")
-    trained_model = train_model(model, X_train, y_train)
+    # flag=False if no GoogleNet
+    trained_model = train_model(model, X_train, y_train, flag=True)
 
     logger.info("Evaluate the model.")
     accuracy_score = evaluate_model(trained_model, X_test, y_test)
     logger.info("The accurarcy is " + str(accuracy_score))
 
     logger.info("Save model")
-    trained_model.save("dogs_vs_cats_model_VGG-like_convnet.h5")
+    #trained_model.save("dogs_vs_cats_model_VGG-like_convnet.h5")
+    trained_model.save("dogs_vs_cats_model_googlenet.h5")
