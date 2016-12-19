@@ -24,8 +24,9 @@ def create_logger():
 
 def convert_image_to_data(image):
     image_resized = Image.open(image).resize((WIDTH, HEIGHT))
-    image_array = np.array(image_resized).T
-    return image_array
+    array = np.array(image_resized).astype("float32")
+    transformed_array = np.concatenate([[array[:, :, 0]], [array[:, :, 1]], [array[:, :, 2]]])
+    return transformed_array
 
 
 def read_data():
