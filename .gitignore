@@ -97,4 +97,7 @@ ENV/
 data/
 .idea/
 *.h5
-submissions.csv
+preview/
+bottleneck_understanding.ipynb
+*.npy
+*.csv
