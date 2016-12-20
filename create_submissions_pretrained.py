@@ -5,7 +5,7 @@ import glob
 import numpy as np
 import pandas as pd
 from PIL import Image
-from vgg16_pretrained_model import vgg16_pretrained_model
+from models.vgg16_pretrained_model import vgg16_pretrained_model
 
 WIDTH = 150
 HEIGHT = 150

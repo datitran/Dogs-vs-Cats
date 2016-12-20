@@ -7,8 +7,8 @@ from PIL import Image
 from sklearn.model_selection import StratifiedShuffleSplit, train_test_split
 from sklearn.metrics import accuracy_score
 from keras.callbacks import EarlyStopping
-from modified_vgg_16_model import modified_vgg_16l
-from google_net import modified_googlenet
+from models.modified_vgg_16_model import modified_vgg_16l
+from models.google_net import modified_googlenet
 
 """
 64 * 64 for VGG16

@@ -7,10 +7,15 @@ Download it and create a `data` folder, put `train.zip` and `test.zip` into it.
 ## Getting Started
 
 #### Train data
-`python script.py`
+`python dogs_vs_cats_training.py`
 
 #### Generate submissions for kaggle
-`python script.py`
+`python create_submissions.py`
+
+#### Notes
+- Pretrained VGG16 model: `dogs_vs_cats_training_pretrained.py`
+- Pretrained VGG16 model with image augmentation: `dogs_vs_cats_training_pretrained_optimized.py`
+- Submission generation script: `create_submissions_pretrained.py`
 
 ## Copyright
 
